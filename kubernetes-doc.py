@@ -2,6 +2,8 @@ import requests_html as rh
 import os
 # import pypandoc
 import subprocess
+from weasyprint import HTML
+from pathlib import Path
 
 def generate_directory_pdf(url, name, s=None):
     s = rh.HTMLSession() if not s else s
@@ -39,7 +41,9 @@ def generate_directory_pdf(url, name, s=None):
             f.write(html)
 
     print("generating pdf...")
-    subprocess.run(["{}/weasy_print.sh".format(cwd), name])
+    pdf = HTML("{}.html".format(name)).write_pdf()
+    Path("PDFs/{}.pdf".format(name)).write_bytes(pdf)
+    #subprocess.run(["{}/weasy_print.sh".format(cwd), name])
     # try:
     #     output = pypandoc.convert_text(html, "pdf", format="html", outputfile="./{}.pdf".format(name), extra_args=['--pdf-engine=weasyprint', '--css=codeblock_wrap.css'])
     # except Exception as e:
@@ -50,14 +54,14 @@ if __name__ == '__main__':
     directories = [\
                    "Setup",
                    "Concepts",
-                   "Tasks",
                    "Tutorials",
                    "Reference",
+                   "Tasks",
                    # "Getting-started-guides",  # same as setup
                    # "Admin",  # this direct to concepts
                    # "Imported",  # deprecated
                    ]
-    directories_pairs = [("https://kubernetes.io/docs/{}/".format(n.lower()), n) for n in directories]
+    directories_pairs = [("https://kubernetes.io/zh-cn/docs/{}/".format(n.lower()), n) for n in directories]
     for url, name in directories_pairs:
         print(name)
         generate_directory_pdf(url, name)
